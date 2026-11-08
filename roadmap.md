@@ -1,0 +1,22 @@
+# Roadmap
+- [x] Refresh Admin, Faculty and Student dashboards with emerald navigation, colorful statistics, branded headings and themed tables; desktop/phone checks show no overflow or runtime errors, and 12 regression tests pass.
+- [x] Fix the calendar opening an unmarked subject: default to the student's latest submitted subject; today's Faculty demo submission shows green on Student desktop/phone, subject isolation and 19 tests pass. Real-account testing unavailable because no accounts exist.
+- [x] Connect submitted attendance to Cloud with automatic five-second calendar refresh and student-own access; 47 tests and green/red demo readback passed. Real cross-device verification is blocked because no real accounts exist; previous browser-only sheets are not uploaded automatically and must be resubmitted by Faculty.
+- [x] Replace Student attendance graphs with a monthly subject calendar; 15 tests and desktop/phone demo faculty-to-student mark readback passed; real records remain browser-local, cross-device delivery not connected.
+- [x] Add right-side leave approval/rejection notifications to Student and Faculty; demo recipient/readback and mobile verified, real-account testing unavailable (requester has no account); student delivery remains browser-local
+- [x] Show submitted daily attendance reports for Faculty by date, subject and year; submitted versus unsaved marks, edits, year isolation and CSV export verified; all 37 tests passed
+- [x] Add required subject selection and anonymous, year/faculty-grouped Admin feedback readback; unit tests and demo screens verified (real account unavailable)
+- [x] Restore assigned-subject feedback viewing for Faculty as well as Admin; feedback remains browser-local
+- [x] Explain how to host the app locally on the user's computer; local machine setup must be run by the user
+- [x] Highlight existing automated alerts above charts with priority colors, counts, expandable list, and review actions; verified demo flows and mobile width
+- [x] Add Faculty login and demo, profile/details, student details/attendance/feedback, incoming leaves, and faculty leaves to Admin
+- [x] Replace email sign-in with USN / Admin / Faculty ID; retain verification email at signup
+- [x] Check provider crash; isolate context identity and verify no current crash
+- [x] Add isolated Admin and Student demo accounts and verify both views
+- [x] Remove Continue with Lovable from sign-in
+- [x] Real sign up / sign in (email, Google, Lovable); admin role for admin@gmu.ac.in
+- [x] Rename hero heading to "Campus Management System"
+- Deferred earlier scope: move existing campus student/faculty data and student leave letters into Cloud; faculty leave letters now use Cloud.
+
+- [x] Live Events (10 events) and student Payments (fee, hostel, shortage, re-exam) in Student dashboard
+- [x] Live Events editing restricted to Admin only, with visible note for others; verified in all three demos

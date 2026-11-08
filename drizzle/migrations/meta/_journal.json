@@ -1,0 +1,62 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1793870200186,
+      "tag": "0000_auth_profiles_roles",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793871316738,
+      "tag": "0001_campus_login_identifiers",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793871528614,
+      "tag": "0002_faculty_role",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793871653598,
+      "tag": "0003_faculty_access_and_leave",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793871750162,
+      "tag": "0004_protect_faculty_assignment",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794035441072,
+      "tag": "0005_shared_student_daily_attendance",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794148296880,
+      "tag": "0006_login_by_role_identifier",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794148506437,
+      "tag": "0007_signup_identifier_by_role",
+      "breakpoints": true
+    }
+  ]
+}

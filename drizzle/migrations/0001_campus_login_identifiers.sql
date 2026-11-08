@@ -1,0 +1,17 @@
+ALTER TABLE public.profiles ADD COLUMN login_id text;
+UPDATE public.profiles SET login_id = upper(trim(student_id)) WHERE student_id IS NOT NULL AND trim(student_id) ~* '^[A-Z0-9][A-Z0-9_-]{1,29}$';
+UPDATE public.profiles p SET login_id = 'ADMIN' WHERE EXISTS (SELECT 1 FROM public.user_roles r WHERE r.user_id = p.id AND r.role = 'admin');
+CREATE UNIQUE INDEX profiles_login_id_unique ON public.profiles (login_id) WHERE login_id IS NOT NULL;
+ALTER TABLE public.profiles ADD CONSTRAINT profiles_login_id_format CHECK (login_id IS NULL OR login_id ~ '^[A-Z0-9][A-Z0-9_-]{1,29}$');
+CREATE OR REPLACE FUNCTION public.resolve_campus_login(_login_id text) RETURNS text LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$ SELECT u.email::text FROM public.profiles p JOIN auth.users u ON u.id = p.id WHERE p.login_id = upper(trim(_login_id)) LIMIT 1 $$;
+REVOKE ALL ON FUNCTION public.resolve_campus_login(text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.resolve_campus_login(text) TO service_role;
+CREATE TABLE public.campus_login_attempts (login_id text PRIMARY KEY, window_start timestamptz NOT NULL DEFAULT now(), attempts integer NOT NULL DEFAULT 0);
+GRANT ALL ON public.campus_login_attempts TO service_role;
+ALTER TABLE public.campus_login_attempts ENABLE ROW LEVEL SECURITY;
+CREATE OR REPLACE FUNCTION public.consume_campus_login_attempt(_login_id text) RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$ DECLARE n integer; BEGIN INSERT INTO public.campus_login_attempts(login_id, attempts) VALUES (upper(trim(_login_id)),1) ON CONFLICT (login_id) DO UPDATE SET attempts = CASE WHEN campus_login_attempts.window_start < now() - interval '1 minute' THEN 1 ELSE campus_login_attempts.attempts + 1 END, window_start = CASE WHEN campus_login_attempts.window_start < now() - interval '1 minute' THEN now() ELSE campus_login_attempts.window_start END RETURNING attempts INTO n; RETURN n <= 10; END $$;
+REVOKE ALL ON FUNCTION public.consume_campus_login_attempt(text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.consume_campus_login_attempt(text) TO service_role;
+CREATE OR REPLACE FUNCTION public.handle_new_user() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$ DECLARE identifier text; BEGIN identifier := NULLIF(upper(trim(COALESCE(NEW.raw_user_meta_data->>'login_id', NEW.raw_user_meta_data->>'student_id',''))),''); IF lower(NEW.email) = 'admin@gmu.ac.in' THEN identifier := 'ADMIN'; ELSIF identifier = 'ADMIN' THEN RAISE EXCEPTION 'This sign-in ID is reserved.'; END IF; INSERT INTO public.profiles (id, full_name, student_id, login_id) VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data->>'full_name',''), CASE WHEN identifier ~ '^GMU[0-9]{4}$' THEN identifier ELSE NULL END, identifier); INSERT INTO public.user_roles (user_id, role) VALUES (NEW.id, CASE WHEN lower(NEW.email) = 'admin@gmu.ac.in' THEN 'admin'::public.app_role ELSE 'student'::public.app_role END); RETURN NEW; END $$;
+CREATE OR REPLACE FUNCTION public.protect_campus_login_id() RETURNS trigger LANGUAGE plpgsql SET search_path = public AS $$ BEGIN IF NEW.login_id IS DISTINCT FROM OLD.login_id AND current_user IN ('authenticated','anon') THEN RAISE EXCEPTION 'Sign-in IDs must be changed by an administrator.'; END IF; RETURN NEW; END $$;
+CREATE TRIGGER protect_campus_login_id BEFORE UPDATE ON public.profiles FOR EACH ROW EXECUTE FUNCTION public.protect_campus_login_id();
